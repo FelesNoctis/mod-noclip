@@ -290,25 +290,40 @@ bool CustomPlayerInformation::CollisionInFront(Position xPosPlayer, Position xPo
         // check static LOS
         float halfHeight = this->player->GetCollisionHeight() * 0.5f;
 
-        // CHANGED: Restored to standard AzerothCore API function name
+        // Build the start and end position vectors required by GetObjectHitPos
+        Vector3 startPos(xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight);
+        Vector3 endPos(xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight);
+        Vector3 resultPos;
+
+        // Pass vectors instead of individual floats
         bool col = VMAP::VMapFactory::createOrGetVMapMgr()->GetObjectHitPos(this->player->GetMapId(),
-            xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight,
-            xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight,
-            xPosCollisionX, xPosCollisionY, xPosCollisionZ, -CONTACT_DISTANCE);
+            startPos, endPos, resultPos, -CONTACT_DISTANCE);
 
         // Collided with static LOS object, move back to collision point
         if (col)
         {
+            // Update collision Z to hit position
+            xPosCollisionX = resultPos.x;
+            xPosCollisionY = resultPos.y;
+            xPosCollisionZ = resultPos.z;
             return true;
         }
         xPosCollisionZ -= halfHeight;
 
         // check dynamic collision
-        // CHANGED: Restored to standard AzerothCore API function name
+        // Re-assign positions for dynamic check
+        startPos = Vector3(xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight);
+        endPos = Vector3(xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight);
+
         col = this->player->GetMap()->GetObjectHitPos(this->player->GetPhaseMask(),
-            xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight,
-            xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight,
-            xPosCollisionX, xPosCollisionY, xPosCollisionZ, -CONTACT_DISTANCE);
+            startPos, endPos, resultPos, -CONTACT_DISTANCE);
+
+        if (col)
+        {
+            xPosCollisionX = resultPos.x;
+            xPosCollisionY = resultPos.y;
+            xPosCollisionZ = resultPos.z;
+        }
 
         xPosCollisionZ -= halfHeight;
 
