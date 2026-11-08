@@ -290,8 +290,7 @@ bool CustomPlayerInformation::CollisionInFront(Position xPosPlayer, Position xPo
         // check static LOS
         float halfHeight = this->player->GetCollisionHeight() * 0.5f;
 
-        // VMapMgr2 uses GetObjectHitPos with individual raw float parameters
-        bool col = VMAP::VMapFactory::createOrGetVMapMgr()->GetObjectHitPos(this->player->GetMapId(),
+        bool col = VMAP::VMapFactory::createOrGetVMapMgr()->GetHitPos(this->player->GetMapId(),
             xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight,
             xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight,
             xPosCollisionX, xPosCollisionY, xPosCollisionZ, -CONTACT_DISTANCE);
@@ -304,11 +303,10 @@ bool CustomPlayerInformation::CollisionInFront(Position xPosPlayer, Position xPo
         xPosCollisionZ -= halfHeight;
 
         // check dynamic collision
-        // Map uses GetHitPosition (not GetObjectHitPos) to wrap both dynamic & phase collision check
-        col = this->player->GetMap()->GetHitPosition(
+        col = this->player->GetMap()->GetHitPos(this->player->GetPhaseMask(),
             xPosPlayerX, xPosPlayerY, xPosPlayerZ + halfHeight,
             xPosCollisionX, xPosCollisionY, xPosCollisionZ + halfHeight,
-            -CONTACT_DISTANCE);
+            xPosCollisionX, xPosCollisionY, xPosCollisionZ, -CONTACT_DISTANCE);
 
         xPosCollisionZ -= halfHeight;
 
